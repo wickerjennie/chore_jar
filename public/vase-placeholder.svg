@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 200" width="120" height="200" role="img" aria-label="Greek vase placeholder">
+  <defs>
+    <linearGradient id="clay" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c9a66b"/>
+      <stop offset="100%" style="stop-color:#8b6914"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="60" cy="22" rx="18" ry="8" fill="url(#clay)" stroke="#5c4510" stroke-width="1.5"/>
+  <rect x="52" y="24" width="16" height="14" rx="2" fill="url(#clay)" stroke="#5c4510" stroke-width="1.5"/>
+  <path d="M38 48 Q30 90 34 130 Q38 175 60 188 Q82 175 86 130 Q90 90 82 48 Z" fill="url(#clay)" stroke="#5c4510" stroke-width="2"/>
+  <ellipse cx="60" cy="188" rx="28" ry="10" fill="#6b5212" stroke="#5c4510" stroke-width="1.5"/>
+  <path d="M44 72 Q60 68 76 72" fill="none" stroke="#3d2e0a" stroke-width="2" stroke-linecap="round"/>
+  <path d="M42 100 Q60 94 78 100" fill="none" stroke="#3d2e0a" stroke-width="1.8" stroke-linecap="round"/>
+  <circle cx="48" cy="118" r="3" fill="#3d2e0a"/>
+  <circle cx="72" cy="118" r="3" fill="#3d2e0a"/>
+</svg>
