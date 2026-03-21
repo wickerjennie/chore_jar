@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useChores } from "../chores/ChoresContext";
 
 export function HomePage() {
-  const { chores } = useChores();
+  const { chores, removeChore } = useChores();
   const [picked, setPicked] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (picked !== null && !chores.includes(picked)) {
+      setPicked(null);
+    }
+  }, [chores, picked]);
 
   function drawChore() {
     if (chores.length === 0) {
@@ -13,6 +19,12 @@ export function HomePage() {
     }
     const i = Math.floor(Math.random() * chores.length);
     setPicked(chores[i] ?? null);
+  }
+
+  function markDone() {
+    if (picked === null) return;
+    removeChore(picked);
+    setPicked(null);
   }
 
   const count = chores.length;
@@ -65,7 +77,14 @@ export function HomePage() {
               to refill the jar.
             </p>
           ) : picked ? (
-            <p className="chore-text">{picked}</p>
+            <div className="draw-result">
+              <p className="chore-text">{picked}</p>
+              <div className="draw-actions">
+                <button type="button" className="primary-button draw-done" onClick={markDone}>
+                  Done
+                </button>
+              </div>
+            </div>
           ) : (
             <p className="chore-placeholder">Tap the vase to draw a chore.</p>
           )}

@@ -13,6 +13,7 @@ const STORAGE_KEY = "chore-jar-chores";
 type ChoresContextValue = {
   chores: string[];
   addChore: (text: string) => void;
+  removeChore: (text: string) => void;
 };
 
 const ChoresContext = createContext<ChoresContextValue | null>(null);
@@ -42,9 +43,17 @@ export function ChoresProvider({ children }: { children: ReactNode }) {
     setChores((prev) => [...prev, trimmed]);
   }, []);
 
+  const removeChore = useCallback((text: string) => {
+    setChores((prev) => {
+      const i = prev.indexOf(text);
+      if (i === -1) return prev;
+      return [...prev.slice(0, i), ...prev.slice(i + 1)];
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({ chores, addChore }),
-    [chores, addChore]
+    () => ({ chores, addChore, removeChore }),
+    [chores, addChore, removeChore]
   );
 
   return (

@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useChores } from "../chores/ChoresContext";
 
@@ -6,13 +6,38 @@ export function AddChorePage() {
   const { addChore } = useChores();
   const navigate = useNavigate();
   const [text, setText] = useState("");
+  const [pendingChore, setPendingChore] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const yesButtonRef = useRef<HTMLButtonElement>(null);
 
-  function handleSubmit(e: FormEvent) {
+  const showAddAnother = pendingChore !== null;
+
+  useEffect(() => {
+    if (showAddAnother) {
+      yesButtonRef.current?.focus();
+    }
+  }, [showAddAnother]);
+
+  function openAddAnotherPrompt(e: FormEvent) {
     e.preventDefault();
     const trimmed = text.trim();
     if (!trimmed) return;
-    addChore(trimmed);
+    setPendingChore(trimmed);
+  }
+
+  function handleYes() {
+    if (pendingChore === null) return;
+    addChore(pendingChore);
     setText("");
+    setPendingChore(null);
+    requestAnimationFrame(() => textareaRef.current?.focus());
+  }
+
+  function handleNo() {
+    if (pendingChore === null) return;
+    addChore(pendingChore);
+    setText("");
+    setPendingChore(null);
     navigate("/");
   }
 
@@ -27,8 +52,9 @@ export function AddChorePage() {
       </header>
 
       <main className="add-main">
-        <form className="add-form" onSubmit={handleSubmit}>
+        <form className="add-form" onSubmit={openAddAnotherPrompt}>
           <textarea
+            ref={textareaRef}
             id="chore-input"
             className="chore-input"
             value={text}
@@ -44,6 +70,34 @@ export function AddChorePage() {
           </button>
         </form>
       </main>
+
+      {showAddAnother && (
+        <div className="add-another-backdrop">
+          <div
+            className="add-another-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-another-title"
+          >
+            <h2 id="add-another-title" className="add-another-title">
+              Add another?
+            </h2>
+            <div className="add-another-actions">
+              <button
+                ref={yesButtonRef}
+                type="button"
+                className="primary-button add-another-btn"
+                onClick={handleYes}
+              >
+                Yes
+              </button>
+              <button type="button" className="secondary-button add-another-btn" onClick={handleNo}>
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
