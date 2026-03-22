@@ -18,6 +18,19 @@ export function AddChorePage() {
     }
   }, [showAddAnother]);
 
+  // Escape: dismiss “Add another?” without writing to storage; textarea text stays so the user can Save again.
+  useEffect(() => {
+    if (!showAddAnother) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setPendingChore(null);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [showAddAnother]);
+
   function openAddAnotherPrompt(e: FormEvent) {
     e.preventDefault();
     const trimmed = text.trim();
