@@ -54,21 +54,27 @@ export function HomePage() {
       </p>
 
       <main className="home-main">
-        <button
-          type="button"
-          className="vase-button"
-          onClick={drawChore}
-          aria-label="Pick a random chore from the jar"
-        >
-          <img
-            src="/vase-placeholder.svg"
-            alt=""
-            className="vase-image"
-            width={140}
-            height={234}
-            draggable={false}
-          />
-        </button>
+        <div className="jar-draw-stack">
+          <button
+            type="button"
+            className="jar-button"
+            onClick={drawChore}
+            aria-label="Draw a random chore from the jar"
+            aria-describedby="jar-draw-hint"
+          >
+            <img
+              src="/jar-with-handle-256.png"
+              alt=""
+              className="jar-image"
+              width={256}
+              height={256}
+              draggable={false}
+            />
+          </button>
+          <p className="jar-draw-label" id="jar-draw-hint">
+            Draw a chore
+          </p>
+        </div>
 
         <section className="chore-result" aria-live="polite">
           {chores.length === 0 ? (
@@ -79,14 +85,17 @@ export function HomePage() {
           ) : picked ? (
             <div className="draw-result">
               <p className="chore-text">{picked}</p>
+              <p className="draw-done-hint">
+                Done removes only this chore from the jar—not the whole list.
+              </p>
               <div className="draw-actions">
                 <button type="button" className="primary-button draw-done" onClick={markDone}>
-                  Done
+                  Done with this chore
                 </button>
               </div>
             </div>
           ) : (
-            <p className="chore-placeholder">Tap the vase to draw a chore.</p>
+            <p className="chore-placeholder">Tap the jar above to pick a chore.</p>
           )}
         </section>
       </main>
