@@ -1,10 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useChores } from "../chores/ChoresContext";
+
+const JAR_DRAW_ANIM_MS = 480;
 
 export function HomePage() {
   const { chores, removeChore } = useChores();
   const [picked, setPicked] = useState<string | null>(null);
+  const [jarDrew, setJarDrew] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const jarAnimTimerRef = useRef<number | null>(null);
+  const feedbackTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (picked !== null && !chores.includes(picked)) {
@@ -12,19 +18,52 @@ export function HomePage() {
     }
   }, [chores, picked]);
 
+  useEffect(() => {
+    return () => {
+      if (jarAnimTimerRef.current !== null) window.clearTimeout(jarAnimTimerRef.current);
+      if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
+    };
+  }, []);
+
+  function triggerJarDrawAnim() {
+    if (jarAnimTimerRef.current !== null) window.clearTimeout(jarAnimTimerRef.current);
+    setJarDrew(true);
+    jarAnimTimerRef.current = window.setTimeout(() => {
+      setJarDrew(false);
+      jarAnimTimerRef.current = null;
+    }, JAR_DRAW_ANIM_MS);
+  }
+
   function drawChore() {
+    setFeedbackMessage(null);
+    if (feedbackTimerRef.current !== null) {
+      window.clearTimeout(feedbackTimerRef.current);
+      feedbackTimerRef.current = null;
+    }
     if (chores.length === 0) {
       setPicked(null);
       return;
     }
+    triggerJarDrawAnim();
     const i = Math.floor(Math.random() * chores.length);
     setPicked(chores[i] ?? null);
   }
 
   function markDone() {
     if (picked === null) return;
+    const willBeEmpty = chores.length <= 1;
     removeChore(picked);
     setPicked(null);
+    if (feedbackTimerRef.current !== null) window.clearTimeout(feedbackTimerRef.current);
+    setFeedbackMessage(
+      willBeEmpty
+        ? "Last one done—jar is empty. Tap + to add more chores."
+        : "Removed from jar.",
+    );
+    feedbackTimerRef.current = window.setTimeout(() => {
+      setFeedbackMessage(null);
+      feedbackTimerRef.current = null;
+    }, 3200);
   }
 
   const count = chores.length;
@@ -54,46 +93,41 @@ export function HomePage() {
       </p>
 
       <main className="home-main">
-        <div className="jar-draw-stack">
-          <button
-            type="button"
-            className="jar-button"
-            onClick={drawChore}
-            aria-label="Draw a random chore from the jar"
-            aria-describedby="jar-draw-hint"
-          >
-            <img
-              src="/jar-with-handle-256.png"
-              alt=""
-              className="jar-image"
-              width={256}
-              height={256}
-              draggable={false}
-            />
-          </button>
-          <p className="jar-draw-label" id="jar-draw-hint">
-            Draw a chore
-          </p>
-        </div>
+        <button
+          type="button"
+          className={`jar-button${jarDrew ? " jar-button--drew" : ""}`}
+          onClick={drawChore}
+          aria-label="Draw a random chore from the jar"
+        >
+          <img
+            src="/jar-with-handle-256.png"
+            alt=""
+            className="jar-image"
+            width={256}
+            height={256}
+            draggable={false}
+          />
+        </button>
 
         <section className="chore-result" aria-live="polite">
           {chores.length === 0 ? (
             <p className="chore-placeholder">
-              Nothing to draw right now. When you want more tasks, tap <strong>+</strong>{" "}
-              to refill the jar.
+              Nothing to draw right now. Use the <strong>+</strong> button (top right) to add
+              chores and refill the jar.
             </p>
           ) : picked ? (
             <div className="draw-result">
               <p className="chore-text">{picked}</p>
-              <p className="draw-done-hint">
-                Done removes only this chore from the jar—not the whole list.
-              </p>
               <div className="draw-actions">
                 <button type="button" className="primary-button draw-done" onClick={markDone}>
                   Done with this chore
                 </button>
               </div>
             </div>
+          ) : feedbackMessage ? (
+            <p className="home-feedback" role="status" aria-live="polite">
+              {feedbackMessage}
+            </p>
           ) : (
             <p className="chore-placeholder">Tap the jar above to pick a chore.</p>
           )}

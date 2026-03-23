@@ -162,19 +162,6 @@ body {
   padding-top: 8px;
 }
 
-.jar-draw-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.jar-draw-label {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
 .jar-button {
   padding: 20px 24px 28px;
   border: none;
@@ -197,6 +184,30 @@ body {
   transform: translateY(0);
 }
 
+@keyframes jar-draw-feedback {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(0) scale(1.07);
+  }
+  65% {
+    transform: translateY(0) scale(0.97);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.jar-button--drew {
+  animation: jar-draw-feedback 0.48s ease-out;
+}
+
+.jar-button--drew:hover,
+.jar-button--drew:focus-visible {
+  transform: translateY(0);
+}
+
 .jar-image {
   display: block;
   max-width: min(160px, 42vw);
@@ -204,10 +215,10 @@ body {
   user-select: none;
 }
 
-.draw-done-hint {
-  margin: 0 0 4px;
-  font-size: 0.85rem;
+.home-feedback {
+  margin: 0;
   color: var(--muted);
+  font-size: 1.05rem;
   max-width: 280px;
   margin-inline: auto;
 }
@@ -319,44 +330,95 @@ body {
   cursor: not-allowed;
 }
 
-.add-another-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: rgba(0, 0, 0, 0.35);
+.spell-status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
-.add-another-dialog {
-  width: 100%;
-  max-width: 320px;
-  padding: 24px;
-  background: var(--bg);
-  border-radius: var(--radius);
+.spell-status--muted {
+  color: rgba(92, 92, 107, 0.85);
+}
+
+.spell-suggestions {
+  padding: 14px 16px;
+  background: var(--surface);
   border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  border-radius: var(--radius);
 }
 
-.add-another-title {
-  margin: 0 0 20px;
-  font-size: 1.2rem;
+.spell-suggestions-title {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
   font-weight: 600;
-  text-align: center;
+  color: var(--muted);
+}
+
+.spell-issues {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.spell-issue {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  font-size: 0.95rem;
+}
+
+.spell-issue-word {
+  font-weight: 600;
   color: var(--text);
 }
 
-.add-another-actions {
+.spell-issue-sep {
+  color: var(--muted);
+  user-select: none;
+}
+
+.spell-suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.spell-suggestion-chip {
+  margin: 0;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--accent-dim);
+  background: var(--bg);
+  border: 1px solid rgba(138, 104, 24, 0.35);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.spell-suggestion-chip:hover,
+.spell-suggestion-chip:focus-visible {
+  background: rgba(184, 137, 42, 0.12);
+  outline: none;
+}
+
+.spell-suggestion-chip:active {
+  transform: scale(0.98);
+}
+
+.add-form-actions {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.add-another-btn {
+.add-form-actions .primary-button,
+.add-form-actions .secondary-button {
   margin-top: 0;
-  width: 100%;
 }
 
 .secondary-button {
@@ -381,4 +443,9 @@ body {
 
 .secondary-button:active {
   transform: scale(0.99);
+}
+
+.secondary-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

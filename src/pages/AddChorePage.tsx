@@ -1,58 +1,77 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useChores } from "../chores/ChoresContext";
+import type { NSpell } from "nspell";
+import {
+  applySuggestionToText,
+  findSpellIssues,
+  loadEnglishSpellchecker,
+  type SpellIssue,
+} from "../spelling/englishSpell";
+
+const SPELL_DEBOUNCE_MS = 450;
 
 export function AddChorePage() {
   const { addChore } = useChores();
   const navigate = useNavigate();
   const [text, setText] = useState("");
-  const [pendingChore, setPendingChore] = useState<string | null>(null);
+  const [spell, setSpell] = useState<NSpell | null>(null);
+  const [spellIssues, setSpellIssues] = useState<SpellIssue[]>([]);
+  const [spellStatus, setSpellStatus] = useState<"loading" | "ready" | "error">("loading");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const yesButtonRef = useRef<HTMLButtonElement>(null);
-
-  const showAddAnother = pendingChore !== null;
 
   useEffect(() => {
-    if (showAddAnother) {
-      yesButtonRef.current?.focus();
-    }
-  }, [showAddAnother]);
+    let cancelled = false;
+    loadEnglishSpellchecker()
+      .then((s) => {
+        if (!cancelled) {
+          setSpell(s);
+          setSpellStatus("ready");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setSpellStatus("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  // Escape: dismiss “Add another?” without writing to storage; textarea text stays so the user can Save again.
   useEffect(() => {
-    if (!showAddAnother) return;
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        setPendingChore(null);
-      }
-    }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [showAddAnother]);
+    if (!spell) return;
+    const handle = window.setTimeout(() => {
+      const trimmed = text.trim();
+      setSpellIssues(trimmed ? findSpellIssues(text, spell) : []);
+    }, SPELL_DEBOUNCE_MS);
+    return () => window.clearTimeout(handle);
+  }, [text, spell]);
 
-  function openAddAnotherPrompt(e: FormEvent) {
-    e.preventDefault();
-    const trimmed = text.trim();
-    if (!trimmed) return;
-    setPendingChore(trimmed);
-  }
-
-  function handleYes() {
-    if (pendingChore === null) return;
-    addChore(pendingChore);
-    setText("");
-    setPendingChore(null);
+  function applySuggestion(issue: SpellIssue, replacement: string) {
+    setText((t) => applySuggestionToText(t, issue.sample, replacement));
     requestAnimationFrame(() => textareaRef.current?.focus());
   }
 
-  function handleNo() {
-    if (pendingChore === null) return;
-    addChore(pendingChore);
+  function saveAndStay() {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    addChore(trimmed);
     setText("");
-    setPendingChore(null);
+    requestAnimationFrame(() => textareaRef.current?.focus());
+  }
+
+  function saveAndHome() {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    addChore(trimmed);
+    setText("");
     navigate("/");
   }
+
+  function preventSubmit(e: FormEvent) {
+    e.preventDefault();
+  }
+
+  const canSave = Boolean(text.trim());
 
   return (
     <div className="page add-page">
@@ -65,7 +84,7 @@ export function AddChorePage() {
       </header>
 
       <main className="add-main">
-        <form className="add-form" onSubmit={openAddAnotherPrompt}>
+        <form className="add-form" onSubmit={preventSubmit}>
           <textarea
             ref={textareaRef}
             id="chore-input"
@@ -76,41 +95,71 @@ export function AddChorePage() {
             aria-label="What to add"
             rows={4}
             autoComplete="off"
+            spellCheck
             autoFocus
           />
-          <button type="submit" className="primary-button" disabled={!text.trim()}>
-            Save
-          </button>
+          {spellStatus === "loading" && (
+            <p className="spell-status" aria-live="polite">
+              Loading spelling suggestions…
+            </p>
+          )}
+          {spellStatus === "error" && (
+            <p className="spell-status spell-status--muted" role="status">
+              Offline spelling dictionary could not be loaded. Your browser can still underline typos.
+            </p>
+          )}
+          {spellStatus === "ready" && spellIssues.length > 0 && (
+            <div
+              className="spell-suggestions"
+              role="region"
+              aria-label="Spelling suggestions"
+              aria-live="polite"
+            >
+              <p className="spell-suggestions-title">Tap a fix to replace in your text</p>
+              <ul className="spell-issues">
+                {spellIssues.map((issue) => (
+                  <li key={issue.wordKey} className="spell-issue">
+                    <span className="spell-issue-word">{issue.sample}</span>
+                    <span className="spell-issue-sep" aria-hidden>
+                      →
+                    </span>
+                    <span className="spell-suggestion-chips">
+                      {issue.suggestions.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          className="spell-suggestion-chip"
+                          onClick={() => applySuggestion(issue, s)}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="add-form-actions">
+            <button
+              type="button"
+              className="primary-button"
+              disabled={!canSave}
+              onClick={saveAndStay}
+            >
+              Save & add another
+            </button>
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={!canSave}
+              onClick={saveAndHome}
+            >
+              Save & home
+            </button>
+          </div>
         </form>
       </main>
-
-      {showAddAnother && (
-        <div className="add-another-backdrop">
-          <div
-            className="add-another-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="add-another-title"
-          >
-            <h2 id="add-another-title" className="add-another-title">
-              Add another?
-            </h2>
-            <div className="add-another-actions">
-              <button
-                ref={yesButtonRef}
-                type="button"
-                className="primary-button add-another-btn"
-                onClick={handleYes}
-              >
-                Yes
-              </button>
-              <button type="button" className="secondary-button add-another-btn" onClick={handleNo}>
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
