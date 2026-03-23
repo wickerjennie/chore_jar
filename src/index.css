@@ -115,45 +115,6 @@ body {
   margin-top: -2px;
 }
 
-.jar-status {
-  margin: -8px 0 20px;
-  text-align: center;
-  min-height: 1.5rem;
-}
-
-.jar-status-line {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.jar-status-line--empty {
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-.jar-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1.75rem;
-  height: 1.75rem;
-  padding: 0 8px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #ffffff;
-  background: linear-gradient(180deg, #4a4a54 0%, #35353d 100%);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-.jar-status-label {
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
 .home-main {
   display: flex;
   flex-direction: column;
@@ -267,6 +228,25 @@ body {
   width: 100%;
 }
 
+/* Lighter “Done” — outline accent, not the dark primary bar */
+.draw-actions .primary-button.draw-done {
+  color: var(--accent-dim);
+  background: var(--bg);
+  border: 2px solid rgba(184, 137, 42, 0.42);
+  box-shadow: none;
+}
+
+.draw-actions .primary-button.draw-done:hover:not(:disabled),
+.draw-actions .primary-button.draw-done:focus-visible:not(:disabled) {
+  opacity: 1;
+  background: rgba(184, 137, 42, 0.1);
+  border-color: var(--accent-dim);
+}
+
+.draw-actions .primary-button.draw-done:active:not(:disabled) {
+  background: rgba(184, 137, 42, 0.16);
+}
+
 .add-main {
   padding-top: 8px;
 }
@@ -333,12 +313,36 @@ body {
 .add-form-actions {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: stretch;
+  gap: 8px;
 }
 
-.add-form-actions .primary-button,
-.add-form-actions .secondary-button {
+.add-form-actions .primary-button {
   margin-top: 0;
+}
+
+.add-form-home-link {
+  align-self: center;
+  margin: 0;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.add-form-home-link:hover:not(:disabled),
+.add-form-home-link:focus-visible:not(:disabled) {
+  text-decoration: underline;
+  outline: none;
+}
+
+.add-form-home-link:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .secondary-button {

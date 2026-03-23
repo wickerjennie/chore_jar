@@ -66,8 +66,6 @@ export function HomePage() {
     }, 3200);
   }
 
-  const count = chores.length;
-
   return (
     <div className="page home-page">
       <header className="top-bar">
@@ -78,19 +76,6 @@ export function HomePage() {
           </span>
         </Link>
       </header>
-
-      <p className="jar-status" role="status" aria-live="polite">
-        {count === 0 ? (
-          <span className="jar-status-line jar-status-line--empty">Jar is empty</span>
-        ) : (
-          <span className="jar-status-line">
-            <span className="jar-badge">{count}</span>
-            <span className="jar-status-label">
-              {count === 1 ? "chore" : "chores"} in the jar
-            </span>
-          </span>
-        )}
-      </p>
 
       <main className="home-main">
         <button
@@ -120,7 +105,7 @@ export function HomePage() {
               <p className="chore-text">{picked}</p>
               <div className="draw-actions">
                 <button type="button" className="primary-button draw-done" onClick={markDone}>
-                  Done with this chore
+                  Done
                 </button>
               </div>
             </div>

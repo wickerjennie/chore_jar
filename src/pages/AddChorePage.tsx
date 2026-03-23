@@ -63,15 +63,15 @@ export function AddChorePage() {
               disabled={!canSave}
               onClick={saveAndStay}
             >
-              Save & add another
+              Save
             </button>
             <button
               type="button"
-              className="secondary-button"
+              className="add-form-home-link"
               disabled={!canSave}
               onClick={saveAndHome}
             >
-              Save & home
+              Save and go home
             </button>
           </div>
         </form>
